@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+
+{% block title %}{{ compound.name }} - 3D Structure{% endblock %}
+
+{% block head %}
+<style>
+    #molecule-viewer {
+        height: 500px;
+        width: 100%;
+        border: 2px solid #dee2e6;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .control-panel {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+    
+    .property-card {
+        background: white;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Back Button -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <a href="{{ url_for('index') }}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left"></i> Back to Compounds
+            </a>
+        </div>
+    </div>
+
+    <!-- Compound Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h1 class="card-title mb-3">
+                        <i class="fas fa-atom"></i> {{ compound.name }}
+                    </h1>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <p class="mb-2"><strong>Molecular Formula:</strong> <span class="formula">{{ compound.formula }}</span></p>
+                            <p class="mb-2"><strong>Category:</strong> {{ compound.category }}</p>
+                        </div>
+                        <div class="col-md-8">
+                            <p class="mb-0">{{ compound.description }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- 3D Viewer -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-cube"></i> 3D Molecular Structure
+                    </h3>
+                </div>
+                <div class="card-body p-0">
+                    <div id="molecule-viewer"></div>
+                    <div class="p-3">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i> 
+                            Use mouse to rotate, scroll to zoom, right-click and drag to pan
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls and Information -->
+        <div class="col-lg-4">
+            <!-- Preparation Information -->
+            {% if compound.preparation %}
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-flask"></i> Preparation</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Method:</strong> {{ compound.preparation.method }}</p>
+                    <p><strong>Equation:</strong><br>
+                        <code class="bg-light p-2 d-block rounded">{{ compound.preparation.equation }}</code>
+                    </p>
+                    <p><strong>Reagents:</strong></p>
+                    <ul class="mb-2">
+                        {% for reagent in compound.preparation.reagents %}
+                        <li>{{ reagent }}</li>
+                        {% endfor %}
+                    </ul>
+                    <p class="mb-0"><strong>Conditions:</strong><br>
+                        <small class="text-muted">{{ compound.preparation.conditions }}</small>
+                    </p>
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="control-panel">
+                <h4 class="mb-3"><i class="fas fa-sliders-h"></i> Controls</h4>
+                
+                <div class="property-card">
+                    <h6>Visualization Style</h6>
+                    <div class="btn-group-vertical w-100" role="group">
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="setStyle('stick')">
+                            Stick Model
+                        </button>
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="setStyle('sphere')">
+                            Ball & Stick
+                        </button>
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="setStyle('cartoon')">
+                            Space Filling
+                        </button>
+                    </div>
+                </div>
+
+                <div class="property-card">
+                    <h6>Animation</h6>
+                    <div class="btn-group w-100" role="group">
+                        <button type="button" class="btn btn-success btn-sm" onclick="startRotation()">
+                            <i class="fas fa-play"></i> Start
+                        </button>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="stopRotation()">
+                            <i class="fas fa-stop"></i> Stop
+                        </button>
+                    </div>
+                </div>
+
+                <div class="property-card">
+                    <h6>View Options</h6>
+                    <button type="button" class="btn btn-info btn-sm w-100 mb-2" onclick="resetView()">
+                        <i class="fas fa-home"></i> Reset View
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-sm w-100" onclick="toggleLabels()">
+                        <i class="fas fa-tags"></i> Toggle Labels
+                    </button>
+                </div>
+
+                <!-- Molecular Properties -->
+                <div class="property-card">
+                    <h6>Properties</h6>
+                    <div id="molecule-properties">
+                        <p class="mb-1"><strong>Atoms:</strong> <span id="atom-count">-</span></p>
+                        <p class="mb-1"><strong>Bonds:</strong> <span id="bond-count">-</span></p>
+                        <p class="mb-0"><strong>SMILES:</strong> <small id="smiles-notation">Loading...</small></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Loading 3D structure...</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let viewer;
+let rotationInterval;
+let showLabels = false;
+
+// Initialize 3D viewer
+function initViewer() {
+    const element = document.getElementById('molecule-viewer');
+    const config = { backgroundColor: 'white' };
+    viewer = $3Dmol.createViewer(element, config);
+    
+    // Load molecule data
+    loadMolecule();
+}
+
+// Load molecule from API
+async function loadMolecule() {
+    try {
+        const response = await fetch(`/api/compound/{{ compound_id }}/3d`);
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
+        // Hide loading indicator
+        document.getElementById('loading').style.display = 'none';
+        
+        // Update properties
+        updateProperties(data);
+        
+        // Add molecule to viewer
+        addMoleculeToViewer(data.structure);
+        
+    } catch (error) {
+        console.error('Error loading molecule:', error);
+        document.getElementById('loading').innerHTML = 
+            '<div class="alert alert-danger">Error loading 3D structure: ' + error.message + '</div>';
+    }
+}
+
+// Add molecule to 3Dmol viewer
+function addMoleculeToViewer(structure) {
+    // Clear existing models
+    viewer.removeAllModels();
+    
+    // Create molecule string in XYZ format
+    let xyzString = structure.atoms.length + '\n\n';
+    
+    structure.atoms.forEach(atom => {
+        xyzString += `${atom.element} ${atom.x.toFixed(6)} ${atom.y.toFixed(6)} ${atom.z.toFixed(6)}\n`;
+    });
+    
+    // Add model to viewer
+    viewer.addModel(xyzString, 'xyz');
+    
+    // Set initial style
+    setStyle('stick');
+    
+    // Center and zoom
+    viewer.zoomTo();
+    viewer.render();
+    
+    // Start auto-rotation
+    startRotation();
+}
+
+// Update molecular properties display
+function updateProperties(data) {
+    document.getElementById('atom-count').textContent = data.structure.atoms.length;
+    document.getElementById('bond-count').textContent = data.structure.bonds.length;
+    document.getElementById('smiles-notation').textContent = data.compound.smiles;
+}
+
+// Set visualization style
+function setStyle(style) {
+    viewer.setStyle({}, {}); // Clear existing styles
+    
+    switch(style) {
+        case 'stick':
+            viewer.setStyle({}, {stick: {radius: 0.1}});
+            break;
+        case 'sphere':
+            viewer.setStyle({}, {stick: {radius: 0.1}, sphere: {scale: 0.3}});
+            break;
+        case 'cartoon':
+            viewer.setStyle({}, {sphere: {scale: 0.8}});
+            break;
+    }
+    
+    if (showLabels) {
+        viewer.addResLabels();
+    }
+    
+    viewer.render();
+}
+
+// Start rotation animation
+function startRotation() {
+    stopRotation(); // Stop any existing rotation
+    rotationInterval = setInterval(() => {
+        viewer.rotate(1, 'y');
+    }, 50);
+}
+
+// Stop rotation animation
+function stopRotation() {
+    if (rotationInterval) {
+        clearInterval(rotationInterval);
+        rotationInterval = null;
+    }
+}
+
+// Reset view to default
+function resetView() {
+    viewer.zoomTo();
+    viewer.render();
+}
+
+// Toggle atom labels
+function toggleLabels() {
+    showLabels = !showLabels;
+    if (showLabels) {
+        viewer.addResLabels();
+    } else {
+        viewer.removeAllLabels();
+    }
+    viewer.render();
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    initViewer();
+});
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', function() {
+    stopRotation();
+});
+</script>
+{% endblock %}

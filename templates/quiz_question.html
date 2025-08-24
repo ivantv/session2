@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+
+{% block title %}Quiz Question {{ question_num }} of {{ total_questions }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Progress Bar -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span><strong>Question {{ question_num }} of {{ total_questions }}</strong></span>
+                        <span class="text-muted">{{ ((question_num / total_questions) * 100) | round(1) }}% Complete</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar bg-primary" role="progressbar" 
+                             style="width: {{ (question_num / total_questions) * 100 }}%"
+                             aria-valuenow="{{ question_num }}" 
+                             aria-valuemin="0" 
+                             aria-valuemax="{{ total_questions }}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Question Card -->
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">
+                        <i class="fas fa-question-circle"></i> Question {{ question_num }}
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Question Text -->
+                    <h4 class="question-text mb-4">{{ question.question }}</h4>
+                    
+                    <!-- Answer Form -->
+                    <form method="POST" action="{{ url_for('submit_answer') }}" id="quiz-form">
+                        <div class="answer-options">
+                            {% for i in range(question.options|length) %}
+                            <div class="form-check mb-3 p-3 border rounded option-card">
+                                <input class="form-check-input" type="radio" name="answer" 
+                                       id="option{{ i }}" value="{{ i }}" required>
+                                <label class="form-check-label w-100" for="option{{ i }}">
+                                    <strong>{{ ['A', 'B', 'C', 'D'][i] }}.</strong> {{ question.options[i] }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Navigation Buttons -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ url_for('quiz_home') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-home"></i> Exit Quiz
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg" id="submit-btn" disabled>
+                                {% if question_num == total_questions %}
+                                    <i class="fas fa-flag-checkered"></i> Finish Quiz
+                                {% else %}
+                                    <i class="fas fa-arrow-right"></i> Next Question
+                                {% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quiz Tips -->
+    <div class="row mt-4">
+        <div class="col-lg-8 mx-auto">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6 class="card-title"><i class="fas fa-lightbulb text-warning"></i> Quiz Tips</h6>
+                    <ul class="mb-0 small">
+                        <li>Read each question carefully before selecting your answer</li>
+                        <li>Think about the molecular structures and preparation methods</li>
+                        <li>Remember the functional groups and their properties</li>
+                        <li>You can exit the quiz anytime, but your progress won't be saved</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Enable submit button when an option is selected
+document.addEventListener('DOMContentLoaded', function() {
+    const radioButtons = document.querySelectorAll('input[name="answer"]');
+    const submitButton = document.getElementById('submit-btn');
+    const optionCards = document.querySelectorAll('.option-card');
+    
+    radioButtons.forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            submitButton.disabled = false;
+            
+            // Remove selection styling from all cards
+            optionCards.forEach(card => {
+                card.classList.remove('border-primary', 'bg-light');
+            });
+            
+            // Add selection styling to selected card
+            const selectedCard = this.closest('.option-card');
+            selectedCard.classList.add('border-primary', 'bg-light');
+        });
+    });
+    
+    // Add hover effects to option cards
+    optionCards.forEach(function(card) {
+        card.addEventListener('mouseenter', function() {
+            if (!this.classList.contains('border-primary')) {
+                this.style.backgroundColor = '#f8f9fa';
+            }
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            if (!this.classList.contains('border-primary')) {
+                this.style.backgroundColor = '';
+            }
+        });
+        
+        // Make entire card clickable
+        card.addEventListener('click', function() {
+            const radio = this.querySelector('input[type="radio"]');
+            radio.checked = true;
+            radio.dispatchEvent(new Event('change'));
+        });
+    });
+    
+    // Auto-submit form after a short delay when answer is selected
+    let autoSubmitTimeout;
+    radioButtons.forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            clearTimeout(autoSubmitTimeout);
+            autoSubmitTimeout = setTimeout(function() {
+                // Optional: Auto-submit after 2 seconds
+                // document.getElementById('quiz-form').submit();
+            }, 2000);
+        });
+    });
+});
+
+// Prevent accidental page refresh
+window.addEventListener('beforeunload', function(e) {
+    e.preventDefault();
+    e.returnValue = 'Are you sure you want to leave? Your quiz progress will be lost.';
+});
+</script>
+
+<style>
+.question-text {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    color: #333;
+}
+
+.option-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.option-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.form-check-input {
+    margin-top: 0.5rem;
+}
+
+.form-check-label {
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.progress {
+    height: 10px;
+}
+
+.card {
+    border: none;
+    border-radius: 15px;
+}
+
+.card-header {
+    border-radius: 15px 15px 0 0 !important;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Organic Chemistry Quiz - Test Your Knowledge{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Quiz Header -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="display-4 text-primary mb-3">
+                <i class="fas fa-brain"></i> Organic Chemistry Quiz
+            </h1>
+            <p class="lead">Test your knowledge of CBSE Class 12 organic compounds</p>
+            <p class="text-muted">Challenge yourself with questions about molecular structures, reactions, and preparations</p>
+        </div>
+    </div>
+
+    <!-- Quiz Features -->
+    <div class="row mb-5">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <i class="fas fa-question-circle fa-3x text-primary mb-3"></i>
+                    <h5 class="card-title">10 Random Questions</h5>
+                    <p class="card-text">Each quiz contains 10 randomly selected questions covering all topics</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <i class="fas fa-clock fa-3x text-success mb-3"></i>
+                    <h5 class="card-title">Timed Assessment</h5>
+                    <p class="card-text">Track your completion time and improve your speed</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    <i class="fas fa-medal fa-3x text-warning mb-3"></i>
+                    <h5 class="card-title">Instant Grading</h5>
+                    <p class="card-text">Get immediate feedback with detailed explanations</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quiz Topics -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0"><i class="fas fa-list"></i> Topics Covered</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success"></i> Alcohols and their properties</li>
+                                <li><i class="fas fa-check text-success"></i> Aldehydes and ketones</li>
+                                <li><i class="fas fa-check text-success"></i> Carboxylic acids and esters</li>
+                                <li><i class="fas fa-check text-success"></i> Amines and their types</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success"></i> Aromatic compounds</li>
+                                <li><i class="fas fa-check text-success"></i> Preparation methods and reagents</li>
+                                <li><i class="fas fa-check text-success"></i> Molecular formulas and structures</li>
+                                <li><i class="fas fa-check text-success"></i> Functional groups and nomenclature</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Start Quiz Section -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-5">
+                    <h2 class="card-title mb-4">Ready to Test Your Knowledge?</h2>
+                    <p class="card-text mb-4">
+                        The quiz contains 10 multiple-choice questions selected randomly from our database. 
+                        You'll receive instant feedback and a detailed grade report at the end.
+                    </p>
+                    <a href="{{ url_for('start_quiz') }}" class="btn btn-light btn-lg">
+                        <i class="fas fa-play"></i> Start Quiz
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grading Scale -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="fas fa-graduation-cap"></i> Grading Scale</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-2 col-sm-4 mb-3">
+                            <div class="grade-box bg-success text-white p-3 rounded">
+                                <h5>A+</h5>
+                                <p class="mb-0">90-100%</p>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-sm-4 mb-3">
+                            <div class="grade-box bg-info text-white p-3 rounded">
+                                <h5>A</h5>
+                                <p class="mb-0">80-89%</p>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-sm-4 mb-3">
+                            <div class="grade-box bg-primary text-white p-3 rounded">
+                                <h5>B</h5>
+                                <p class="mb-0">70-79%</p>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-sm-4 mb-3">
+                            <div class="grade-box bg-warning text-white p-3 rounded">
+                                <h5>C</h5>
+                                <p class="mb-0">60-69%</p>
+                            </div>
+                        </div>
+                        <div class="col-md-2 col-sm-4 mb-3">
+                            <div class="grade-box bg-danger text-white p-3 rounded">
+                                <h5>F</h5>
+                                <p class="mb-0">Below 60%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+.grade-box {
+    transition: transform 0.3s ease;
+}
+
+.grade-box:hover {
+    transform: scale(1.05);
+}
+
+.card {
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+</style>
+{% endblock %}

@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}CBSE Class 12 Organic Chemistry - 3D Molecular Structures{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Section -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="display-4 text-primary mb-3">
+                <i class="fas fa-atom"></i> Organic Chemistry 3D
+            </h1>
+            <p class="lead">Explore CBSE Class 12 organic compounds in interactive 3D format</p>
+            <p class="text-muted">Click on any compound to view its 3D animated structure</p>
+            
+            <!-- Quick Action Buttons -->
+            <div class="mt-4">
+                <a href="{{ url_for('quiz_home') }}" class="btn btn-success btn-lg me-3 mb-2">
+                    <i class="fas fa-brain"></i> Take Quiz
+                </a>
+                <a href="#compounds" class="btn btn-primary btn-lg mb-2">
+                    <i class="fas fa-cube"></i> Browse 3D Models
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quiz Promotion Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-gradient text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card-body text-center py-4">
+                    <h3 class="card-title mb-3">
+                        <i class="fas fa-trophy"></i> Test Your Knowledge!
+                    </h3>
+                    <p class="card-text mb-3">
+                        Challenge yourself with our interactive quiz covering all CBSE Class 12 organic chemistry topics. 
+                        Get instant feedback and improve your understanding!
+                    </p>
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <i class="fas fa-question-circle fa-2x mb-2"></i>
+                            <p class="mb-0"><strong>15 Questions</strong><br><small>Randomly selected</small></p>
+                        </div>
+                        <div class="col-md-4">
+                            <i class="fas fa-clock fa-2x mb-2"></i>
+                            <p class="mb-0"><strong>Timed Quiz</strong><br><small>Track your speed</small></p>
+                        </div>
+                        <div class="col-md-4">
+                            <i class="fas fa-medal fa-2x mb-2"></i>
+                            <p class="mb-0"><strong>Instant Grading</strong><br><small>A+ to F grades</small></p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <a href="{{ url_for('quiz_home') }}" class="btn btn-light btn-lg">
+                            <i class="fas fa-play"></i> Start Quiz Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Compound Categories -->
+    <div id="compounds"></div>
+    {% for category, compounds in categories.items() %}
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="h3 mb-4 text-secondary border-bottom pb-2">
+                <i class="fas fa-flask"></i> {{ category }}
+            </h2>
+            <div class="row">
+                {% for compound in compounds %}
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100 shadow-sm compound-card">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">{{ compound.name }}</h5>
+                            <p class="card-text">
+                                <strong>Formula:</strong> <span class="formula">{{ compound.formula }}</span><br>
+                                <small class="text-muted">{{ compound.description }}</small>
+                            </p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a href="{{ url_for('compound_detail', compound_id=compound.id) }}" 
+                               class="btn btn-primary btn-sm">
+                                <i class="fas fa-cube"></i> View 3D Structure
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- About Section -->
+    <div class="row mt-5" id="about">
+        <div class="col-12">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h3 class="card-title">About This Application</h3>
+                    <p class="card-text">
+                        This interactive 3D molecular visualization tool is designed specifically for CBSE Class 12 
+                        chemistry students. It includes all the important organic compounds from the syllabus, 
+                        allowing you to:
+                    </p>
+                    <ul>
+                        <li>View 3D molecular structures with realistic bond angles and lengths</li>
+                        <li>Rotate and zoom to examine molecules from different angles</li>
+                        <li>Understand spatial arrangements of atoms in organic compounds</li>
+                        <li>Compare different functional groups and their structures</li>
+                    </ul>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            Built with Flask, RDKit for molecular generation, and 3Dmol.js for visualization.
+                        </small>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Add hover effects to compound cards
+    document.querySelectorAll('.compound-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+            this.style.transition = 'transform 0.3s ease';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+</script>
+{% endblock %}

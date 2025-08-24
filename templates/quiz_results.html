@@ -1,0 +1,312 @@
+{% extends "base.html" %}
+
+{% block title %}Quiz Results - {{ grade }} ({{ percentage }}%){% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Results Header -->
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-5">
+                    <h1 class="display-4 mb-3">
+                        <i class="fas fa-trophy"></i> Quiz Complete!
+                    </h1>
+                    <h2 class="mb-3">Your Grade: <span class="badge badge-light fs-1">{{ grade }}</span></h2>
+                    <p class="lead">{{ message }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Score Summary -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-percentage fa-2x text-primary mb-2"></i>
+                    <h3 class="text-primary">{{ percentage }}%</h3>
+                    <p class="mb-0">Score</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                    <h3 class="text-success">{{ score }}</h3>
+                    <p class="mb-0">Correct</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-times-circle fa-2x text-danger mb-2"></i>
+                    <h3 class="text-danger">{{ total_questions - score }}</h3>
+                    <p class="mb-0">Incorrect</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-clock fa-2x text-info mb-2"></i>
+                    <h3 class="text-info">{{ time_taken }}</h3>
+                    <p class="mb-0">Time</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Chart -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="fas fa-chart-pie"></i> Performance Breakdown</h4>
+                </div>
+                <div class="card-body">
+                    <div class="progress mb-3" style="height: 30px;">
+                        <div class="progress-bar bg-success" role="progressbar" 
+                             style="width: {{ (score / total_questions) * 100 }}%"
+                             aria-valuenow="{{ score }}" aria-valuemin="0" aria-valuemax="{{ total_questions }}">
+                            {{ score }} Correct
+                        </div>
+                        <div class="progress-bar bg-danger" role="progressbar" 
+                             style="width: {{ ((total_questions - score) / total_questions) * 100 }}%"
+                             aria-valuenow="{{ total_questions - score }}" aria-valuemin="0" aria-valuemax="{{ total_questions }}">
+                            {{ total_questions - score }} Wrong
+                        </div>
+                    </div>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <span class="badge bg-success">Correct: {{ score }}/{{ total_questions }}</span>
+                        </div>
+                        <div class="col-6">
+                            <span class="badge bg-danger">Incorrect: {{ total_questions - score }}/{{ total_questions }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Results -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="fas fa-list-alt"></i> Detailed Results</h4>
+                </div>
+                <div class="card-body">
+                    {% for result in detailed_results %}
+                    <div class="question-result mb-4 p-3 border rounded 
+                         {% if result.is_correct %}border-success bg-light-success{% else %}border-danger bg-light-danger{% endif %}">
+                        
+                        <!-- Question Header -->
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h6 class="mb-0">
+                                <i class="fas fa-question-circle"></i> Question {{ loop.index }}
+                            </h6>
+                            <span class="badge {% if result.is_correct %}bg-success{% else %}bg-danger{% endif %}">
+                                {% if result.is_correct %}
+                                    <i class="fas fa-check"></i> Correct
+                                {% else %}
+                                    <i class="fas fa-times"></i> Incorrect
+                                {% endif %}
+                            </span>
+                        </div>
+                        
+                        <!-- Question Text -->
+                        <p class="question-text mb-3"><strong>{{ result.question }}</strong></p>
+                        
+                        <!-- Options -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="options-list">
+                                    {% for option in result.options %}
+                                    <div class="option-item p-2 mb-1 rounded
+                                         {% if loop.index0 == result.correct %}bg-success text-white{% endif %}
+                                         {% if loop.index0 == result.selected and not result.is_correct %}bg-danger text-white{% endif %}">
+                                        <strong>{{ ['A', 'B', 'C', 'D'][loop.index0] }}.</strong> {{ option }}
+                                        {% if loop.index0 == result.correct %}
+                                            <i class="fas fa-check float-end"></i>
+                                        {% endif %}
+                                        {% if loop.index0 == result.selected and not result.is_correct %}
+                                            <i class="fas fa-times float-end"></i>
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="explanation-box p-3 bg-info text-white rounded">
+                                    <h6><i class="fas fa-lightbulb"></i> Explanation</h6>
+                                    <p class="mb-0">{{ result.explanation }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <div class="btn-group" role="group">
+                <a href="{{ url_for('start_quiz') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-redo"></i> Take Quiz Again
+                </a>
+                <a href="{{ url_for('index') }}" class="btn btn-success btn-lg">
+                    <i class="fas fa-cube"></i> Study 3D Models
+                </a>
+                <a href="{{ url_for('quiz_home') }}" class="btn btn-info btn-lg">
+                    <i class="fas fa-home"></i> Quiz Home
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Study Recommendations -->
+    {% if percentage < 70 %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Study Recommendations</h5>
+                </div>
+                <div class="card-body">
+                    <p>Based on your performance, we recommend focusing on these areas:</p>
+                    <ul>
+                        <li>Review the 3D molecular structures to understand spatial arrangements</li>
+                        <li>Practice identifying functional groups and their properties</li>
+                        <li>Study preparation methods and reagents for each compound type</li>
+                        <li>Memorize common molecular formulas and IUPAC names</li>
+                    </ul>
+                    <p class="mb-0">
+                        <strong>Tip:</strong> Use the 3D visualization tool to better understand molecular geometry!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+.bg-light-success {
+    background-color: rgba(40, 167, 69, 0.1) !important;
+}
+
+.bg-light-danger {
+    background-color: rgba(220, 53, 69, 0.1) !important;
+}
+
+.question-result {
+    transition: transform 0.3s ease;
+}
+
+.question-result:hover {
+    transform: translateY(-2px);
+}
+
+.option-item {
+    transition: all 0.3s ease;
+}
+
+.explanation-box {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.badge {
+    font-size: 0.9rem;
+}
+
+.progress {
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.card {
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border: none;
+    border-radius: 15px;
+}
+
+.btn-group .btn {
+    margin: 0 5px;
+}
+
+@media (max-width: 768px) {
+    .btn-group {
+        flex-direction: column;
+    }
+    
+    .btn-group .btn {
+        margin: 5px 0;
+    }
+}
+</style>
+
+<script>
+// Add animation to progress bar
+document.addEventListener('DOMContentLoaded', function() {
+    const progressBars = document.querySelectorAll('.progress-bar');
+    progressBars.forEach(function(bar) {
+        const width = bar.style.width;
+        bar.style.width = '0%';
+        setTimeout(function() {
+            bar.style.transition = 'width 1s ease-in-out';
+            bar.style.width = width;
+        }, 500);
+    });
+});
+
+// Confetti effect for high scores
+{% if percentage >= 80 %}
+// Simple confetti effect (you can enhance this with a library like canvas-confetti)
+function createConfetti() {
+    const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7'];
+    for (let i = 0; i < 50; i++) {
+        setTimeout(() => {
+            const confetti = document.createElement('div');
+            confetti.style.position = 'fixed';
+            confetti.style.left = Math.random() * 100 + 'vw';
+            confetti.style.top = '-10px';
+            confetti.style.width = '10px';
+            confetti.style.height = '10px';
+            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            confetti.style.borderRadius = '50%';
+            confetti.style.pointerEvents = 'none';
+            confetti.style.zIndex = '9999';
+            confetti.style.animation = 'fall 3s linear forwards';
+            document.body.appendChild(confetti);
+            
+            setTimeout(() => {
+                confetti.remove();
+            }, 3000);
+        }, i * 100);
+    }
+}
+
+// Add CSS for falling animation
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fall {
+        to {
+            transform: translateY(100vh) rotate(360deg);
+        }
+    }
+`;
+document.head.appendChild(style);
+
+// Trigger confetti after page load
+setTimeout(createConfetti, 1000);
+{% endif %}
+</script>
+{% endblock %}

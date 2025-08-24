@@ -1,0 +1,8 @@
+Script started on Sun Aug 24 20:29:53 2025
+
+The default interactive shell is now zsh.
+To update your account to use zsh, please run `chsh -s /bin/zsh`.
+For more details, please visit https://support.apple.com/kb/HT208050.
+[?1034hbash-3.2$ ps -ef [K g[K| gre [Kp python
+  501 63496 63402   0  8:30PM ttys064    0:00.00 grep python
+bash-3.2$ 
