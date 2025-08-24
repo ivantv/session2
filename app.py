@@ -651,10 +651,10 @@ if __name__ == '__main__':
         print('⚠️  Press Ctrl+C to stop the server')
         
         app.run(
-            debug=True, 
+            debug=False,  # Set to False for production
             host='0.0.0.0', 
-            port=6061,
-            use_reloader=True,
+            port=8080,  # Alternative port
+            use_reloader=False,  # Disable reloader for production
             threaded=True
         )
     except KeyboardInterrupt:
