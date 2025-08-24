@@ -593,7 +593,7 @@ def quiz_results():
         message = 'Fair performance. Review the concepts and try again.'
     else:
         grade = 'F'
-        message = 'Keep studying! Practice more with the 3D models to understand better.'
+        message = 'Keep studying well! Practice more with the 3D models to understand better.'
     
     # Calculate time taken
     start_time = datetime.fromisoformat(session['start_time'])
@@ -653,7 +653,7 @@ if __name__ == '__main__':
         app.run(
             debug=False,  # Set to False for production
             host='0.0.0.0', 
-            port=8080,  # Alternative port
+            port=8080,  # Alternative port 
             use_reloader=False,  # Disable reloader for production
             threaded=True
         )
