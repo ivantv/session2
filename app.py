@@ -4,9 +4,20 @@ from rdkit.Chem import AllChem
 import json
 import random
 from datetime import datetime
+import google.generativeai as genai
+import os
 
 app = Flask(__name__)
 app.secret_key = 'organic_chemistry_secret_key_2024'  # For session management
+
+# Configure Gemini API
+# Note: Set your GEMINI_API_KEY environment variable
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'your-api-key-here')
+if GEMINI_API_KEY and GEMINI_API_KEY != 'your-api-key-here':
+    genai.configure(api_key=GEMINI_API_KEY)
+    model = genai.GenerativeModel('gemini-1.5-flash')  # Updated to current model name
+else:
+    model = None
 
 # CBSE Class 12 Organic Compounds Database
 ORGANIC_COMPOUNDS = {
@@ -632,6 +643,64 @@ def reset_quiz():
     session.pop('start_time', None)
     return redirect(url_for('quiz_home'))
 
+@app.route('/query')
+def query_page():
+    """Display the query page with text input"""
+    return render_template('query.html')
+
+@app.route('/query/ask', methods=['POST'])
+def ask_gemini():
+    """Handle Gemini API queries"""
+    user_question = request.form.get('question', '').strip()
+    
+    if not user_question:
+        return jsonify({'error': 'Please enter a question'}), 400
+    
+    if not model:
+        return jsonify({
+            'error': 'Gemini API is not configured. Please set the GEMINI_API_KEY environment variable.'
+        }), 500
+    
+    try:
+        # Create a context-aware prompt for organic chemistry
+        context_prompt = f"""You are an expert organic chemistry tutor for CBSE Class 12 students. 
+        Please provide a clear, educational answer to the following question about organic chemistry.
+        Focus on CBSE Class 12 syllabus topics including: alcohols, aldehydes, ketones, carboxylic acids, 
+        esters, amines, hydrocarbons, and their reactions, preparations, and properties.
+        
+        Question: {user_question}
+        
+        Please provide a comprehensive but student-friendly answer."""
+        
+        response = model.generate_content(context_prompt)
+        
+        # Check if response has text
+        if not response.text:
+            return jsonify({
+                'error': 'No response generated. Please try rephrasing your question.'
+            }), 500
+        
+        return jsonify({
+            'question': user_question,
+            'answer': response.text,
+            'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        })
+        
+    except Exception as e:
+        error_message = str(e)
+        
+        # Provide more helpful error messages for common issues
+        if '404' in error_message and 'model' in error_message.lower():
+            error_message = 'Model not available. Please check if your API key has access to Gemini models.'
+        elif 'quota' in error_message.lower():
+            error_message = 'API quota exceeded. Please check your Gemini API usage limits.'
+        elif 'authentication' in error_message.lower() or 'api key' in error_message.lower():
+            error_message = 'Invalid API key. Please check your GEMINI_API_KEY environment variable.'
+        
+        return jsonify({
+            'error': f'Error generating response: {error_message}'
+        }), 500
+
 if __name__ == '__main__':
     import signal
     import sys
@@ -653,7 +722,7 @@ if __name__ == '__main__':
         app.run(
             debug=False,  # Set to False for production
             host='0.0.0.0', 
-            port=8080,  # Alternative port 
+            port=8090,  # Alternative port 
             use_reloader=False,  # Disable reloader for production
             threaded=True
         )
